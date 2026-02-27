@@ -1,5 +1,6 @@
 using UnityEngine;
 using static CellType;
+using System.Collections.Generic;
 
 public class BoardManager : MonoBehaviour
 {
@@ -20,6 +21,12 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] private int _width = 12;
     [SerializeField] private int _height = 8;
+
+    public int Width => _width;
+    public int Height => _height;
+
+    public System.Action OnBoardChanged;
+
     [SerializeField] private float _cellSize = 1f;
 
     private void Awake()
@@ -91,6 +98,7 @@ public class BoardManager : MonoBehaviour
         if (!InRange(x, y)) return;
         _objects[x, y] = type;
         _objectViews[x, y].SetSprite(type == ObjectType.None ? null : _spriteLibrary.GetObjectSprite(type));
+        OnBoardChanged?.Invoke();
     }
 
     public void SetText(int x, int y, TextType type)
@@ -98,6 +106,7 @@ public class BoardManager : MonoBehaviour
         if (!InRange(x, y)) return;
         _texts[x, y] = type;
         _textViews[x, y].SetSprite(type == TextType.None ? null : _spriteLibrary.GetTextSprite(type));
+        OnBoardChanged?.Invoke();
     }
 
     public ObjectType GetObject(int x, int y) => _objects[x, y];
@@ -117,7 +126,17 @@ public class BoardManager : MonoBehaviour
         y = Mathf.RoundToInt(local.y / _cellSize);
         return InRange(x, y);
     }
-
+    public List<Vector2Int> FindAll(ObjectType type)
+    {
+        var list = new List<Vector2Int>();
+        for (int y = 0; y < _height; y++)
+            for (int x = 0; x < _width; x++)
+            {
+                if (_objects[x, y] == type)
+                    list.Add(new Vector2Int(x, y));
+            }
+        return list;
+    }
 
     void CreateTestLevel()
     {
