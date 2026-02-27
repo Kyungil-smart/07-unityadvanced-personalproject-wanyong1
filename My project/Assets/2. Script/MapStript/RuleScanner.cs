@@ -3,7 +3,7 @@ using static CellType;
 
 public static class RuleScanner
 {
-    // 인식할 속성들(최소)
+    // 인식할 속성들
     private static bool IsProperty(TextType t)
         => t == TextType.You || t == TextType.Push || t == TextType.Stop || t == TextType.Win;
 

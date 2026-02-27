@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private BoardManager _board;
 
     private RuleSet _rules;
-
+    public bool HasWon { get; private set; }
     public bool IsYou(ObjectType t) => HasRule(t, TextType.You);
     public bool IsStop(ObjectType t) => HasRule(t, TextType.Stop);
     public bool IsPush(ObjectType t) => HasRule(t, TextType.Push);
@@ -47,8 +47,19 @@ public class GameManager : MonoBehaviour
                 Debug.Log($"{kv.Key} IS {prop}");
         }
     }
+    public void TriggerWin(ObjectType youType, Vector2Int cell)
+    {
+        if (HasWon) return;
+        HasWon = true;
 
-    // 다른 스크립트에서 규칙 조회할 수 있게 (이동/충돌 때 씀)
+        Debug.Log($"WIN! YOU={youType}, Cell={cell}");
+
+        // TODO: 여기서 나중에
+        // - 입력 잠금
+        // - 클리어 UI
+        // - 다음 레벨 로드
+    }
+    // 다른 스크립트에서 규칙 조회
     public bool HasRule(ObjectType subject, TextType prop)
         => _rules != null && _rules.Has(subject, prop);
 }
