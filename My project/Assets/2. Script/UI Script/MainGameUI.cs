@@ -4,15 +4,13 @@ using UnityEngine;
 
 public class MainGameUI : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] private GameObject StartButton;
+    [SerializeField] private GameObject HelpButton;
+    [SerializeField] private GameObject QuitButton;
 
-    // Update is called once per frame
-    void Update()
+    private void Awake()
     {
         
     }
 }
+
