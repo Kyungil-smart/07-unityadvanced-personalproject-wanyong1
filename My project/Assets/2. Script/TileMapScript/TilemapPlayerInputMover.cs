@@ -61,19 +61,24 @@ public class TilemapPlayerInputMover : MonoBehaviour
 
         // 1) 목적지에 오브젝트가 있으면 처리
         var targetObj = _board.GetObject(to.x, to.y);
+        bool willWin = (targetObj != ObjectType.None) && (_gm != null && _gm.IsWin(targetObj));
+
         if (targetObj != ObjectType.None)
         {
-            if (_gm != null && _gm.IsStop(targetObj)) return false;
+            // WIN은 "겹치기(먹기)" 허용
+            if (!willWin)
+            {
+                if (_gm != null && _gm.IsStop(targetObj)) return false;
 
-            if (_gm != null && _gm.IsPush(targetObj))
-            {
-                if (!TryShiftObjectAt(to, dir)) return false;
-            }
-            else
-            {
-                // STOP도 아니고 PUSH도 아닌 오브젝트는 "겹치지 못함" 처리로 막고 싶다면 false.
-                // 원작 느낌(대부분은 겹치지 않음)을 원하면 아래 줄 유지.
-                return false;
+                if (_gm != null && _gm.IsPush(targetObj))
+                {
+                    if (!TryShiftObjectAt(to, dir)) return false;
+                }
+                else
+                {
+                    // STOP도 아니고 PUSH도 아닌 오브젝트는 겹치지 못하게 막음(원작 감성)
+                    return false;
+                }
             }
         }
 
@@ -84,12 +89,13 @@ public class TilemapPlayerInputMover : MonoBehaviour
             if (!TryShiftTextAt(to, dir)) return false;
         }
 
-        // 3) 이동
+        // 3) 승리 체크 (덮어쓰기 전에 해야 WIN을 읽을 수 있음)
+        if (willWin)
+            _gm?.CheckWinAt(to);
+
+        // 4) 이동
         _board.SetObject(to.x, to.y, mover);
         _board.SetObject(from.x, from.y, ObjectType.None);
-
-        // 4) 승리 체크
-        _gm?.CheckWinAt(to);
 
         return true;
     }

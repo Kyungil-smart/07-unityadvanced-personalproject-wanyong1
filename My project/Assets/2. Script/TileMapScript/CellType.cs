@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CellType : MonoBehaviour
+public static class CellType
 {
     public enum CellLayer
     {
