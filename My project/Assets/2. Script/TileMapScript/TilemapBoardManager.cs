@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -5,113 +6,189 @@ using static CellType;
 
 public class TilemapBoardManager : MonoBehaviour
 {
-    [Header("Tilemaps")]
-    [SerializeField] private Tilemap _objectTilemap;
+    [Header("Object Tilemaps (one per type)")]
+    [SerializeField] private Tilemap _babaTilemap;
+    [SerializeField] private Tilemap _wallTilemap;
+    [SerializeField] private Tilemap _rockTilemap;
+    [SerializeField] private Tilemap _flagTilemap;
+
+    [Header("Text Tilemap")]
     [SerializeField] private Tilemap _textTilemap;
 
     [Header("Library")]
     [SerializeField] private TileLibrarySO _tiles;
 
-    [Header("Board Size (for scan & bounds)")]
+    [Header("Board Size")]
     [SerializeField] private int _width = 12;
     [SerializeField] private int _height = 8;
-
-    // Tilemap의 원점(셀 좌표 시작점). 필요하면 (0,0) 말고도 가능.
     [SerializeField] private Vector2Int _origin = Vector2Int.zero;
-
 
     public int Width => _width;
     public int Height => _height;
 
-    public System.Action OnBoardChanged;
+    public Action OnBoardChanged;
+
+    // Cell -> multi objects
+    private List<ObjectType>[,] _objs;
 
     private void Awake()
     {
-        if (_objectTilemap == null || _textTilemap == null)
-            Debug.LogWarning("[TilemapBoardManager] Tilemap refs missing.");
-        if (_tiles == null)
-            Debug.LogWarning("[TilemapBoardManager] TileLibrarySO missing.");
+        if (_textTilemap == null) Debug.LogWarning("[TilemapBoardManager] TextTilemap missing.");
+        if (_tiles == null) Debug.LogWarning("[TilemapBoardManager] TileLibrarySO missing.");
+
+        _objs = new List<ObjectType>[_width, _height];
+        for (int y = 0; y < _height; y++)
+            for (int x = 0; x < _width; x++)
+                _objs[x, y] = new List<ObjectType>();
+
+        RebuildFromTilemaps();
     }
 
-    public bool InRange(int x, int y)
-        => 0 <= x && x < _width && 0 <= y && y < _height;
-
-    private Vector3Int ToCell(int x, int y)
-        => new Vector3Int(_origin.x + x, _origin.y + y, 0);
+    public bool InRange(int x, int y) => 0 <= x && x < _width && 0 <= y && y < _height;
+    private Vector3Int ToCell(int x, int y) => new Vector3Int(_origin.x + x, _origin.y + y, 0);
 
     public Vector3 GridToWorld(int x, int y)
     {
-        // (x,y) 셀의 중심 월드 좌표
         var cell = ToCell(x, y);
-        return _objectTilemap.GetCellCenterWorld(cell);
+        var baseMap = _babaTilemap != null ? _babaTilemap : _textTilemap;
+        return baseMap.GetCellCenterWorld(cell);
     }
 
     public bool WorldToGrid(Vector3 worldPos, out int x, out int y)
     {
-        var cell = _objectTilemap.WorldToCell(worldPos);
+        var baseMap = _babaTilemap != null ? _babaTilemap : _textTilemap;
+        var cell = baseMap.WorldToCell(worldPos);
         x = cell.x - _origin.x;
         y = cell.y - _origin.y;
         return InRange(x, y);
     }
 
-    public ObjectType GetObject(int x, int y)
+    // ======================
+    // Objects (multi)
+    // ======================
+    public IReadOnlyList<ObjectType> GetObjects(int x, int y)
+        => InRange(x, y) ? _objs[x, y] : Array.Empty<ObjectType>();
+
+    public bool HasObject(int x, int y, ObjectType type)
     {
-        if (!InRange(x, y)) return ObjectType.None;
-        var tile = _objectTilemap.GetTile(ToCell(x, y));
-        return (_tiles != null && _tiles.TryGetObjectType(tile, out var t)) ? t : ObjectType.None;
+        if (!InRange(x, y)) return false;
+        return _objs[x, y].Contains(type);
     }
 
-    public TextType GetText(int x, int y)
+    public void AddObject(int x, int y, ObjectType type)
     {
-        if (!InRange(x, y)) return TextType.None;
-        var tile = _textTilemap.GetTile(ToCell(x, y));
-        return (_tiles != null && _tiles.TryGetTextType(tile, out var t)) ? t : TextType.None;
-    }
+        if (!InRange(x, y) || type == ObjectType.None) return;
 
-    public void SetObject(int x, int y, ObjectType type)
-    {
-        if (!InRange(x, y) || _tiles == null) return;
-        var cell = ToCell(x, y);
-        _objectTilemap.SetTile(cell, _tiles.GetObjectTile(type));
+        _objs[x, y].Add(type);
+        RenderObjectPresence(x, y, type, present: true);
         OnBoardChanged?.Invoke();
     }
 
-    public void SetText(int x, int y, TextType type)
+    public bool RemoveObjectOnce(int x, int y, ObjectType type)
     {
-        if (!InRange(x, y) || _tiles == null) return;
-        var cell = ToCell(x, y);
-        _textTilemap.SetTile(cell, _tiles.GetTextTile(type));
+        if (!InRange(x, y)) return false;
+
+        var list = _objs[x, y];
+        int idx = list.IndexOf(type);
+        if (idx < 0) return false;
+
+        list.RemoveAt(idx);
+
+        // 같은 타입이 더 남아있으면 타일 유지
+        bool still = list.Contains(type);
+        RenderObjectPresence(x, y, type, present: still);
+
         OnBoardChanged?.Invoke();
+        return true;
+    }
+
+    public void MoveObjectOnce(int fromX, int fromY, int toX, int toY, ObjectType type)
+    {
+        if (!RemoveObjectOnce(fromX, fromY, type)) return;
+        AddObject(toX, toY, type);
     }
 
     public List<Vector2Int> FindAll(ObjectType type)
     {
-        var list = new List<Vector2Int>();
+        var result = new List<Vector2Int>();
         for (int y = 0; y < _height; y++)
             for (int x = 0; x < _width; x++)
             {
-                if (GetObject(x, y) == type)
-                    list.Add(new Vector2Int(x, y));
+                // 같은 칸에 여러 개면 개수만큼 반환(원작스럽게)
+                int count = 0;
+                var list = _objs[x, y];
+                for (int i = 0; i < list.Count; i++)
+                    if (list[i] == type) count++;
+
+                for (int k = 0; k < count; k++)
+                    result.Add(new Vector2Int(x, y));
             }
-        return list;
+        return result;
     }
 
-    [ContextMenu("Create Test Level")]
-    public void CreateTestLevel()
+    // ======================
+    // Text (single)
+    // ======================
+    public TextType GetText(int x, int y)
     {
-        // 오브젝트
-        SetObject(2, 2, ObjectType.Baba);
-        SetObject(4, 2, ObjectType.Rock);
-        SetObject(6, 2, ObjectType.Flag);
+        if (!InRange(x, y) || _tiles == null || _textTilemap == null) return TextType.None;
+        var tile = _textTilemap.GetTile(ToCell(x, y));
+        return _tiles.TryGetTextType(tile, out var t) ? t : TextType.None;
+    }
 
-        // 텍스트: BABA IS YOU
-        SetText(1, 6, TextType.Baba);
-        SetText(2, 6, TextType.Is);
-        SetText(3, 6, TextType.You);
+    public void SetText(int x, int y, TextType type)
+    {
+        if (!InRange(x, y) || _tiles == null || _textTilemap == null) return;
+        _textTilemap.SetTile(ToCell(x, y), _tiles.GetTextTile(type));
+        OnBoardChanged?.Invoke();
+    }
 
-        // FLAG IS WIN
-        SetText(6, 6, TextType.Flag);
-        SetText(7, 6, TextType.Is);
-        SetText(8, 6, TextType.Win);
+    // ======================
+    // Build from painted tilemaps
+    // ======================
+    [ContextMenu("Rebuild From Tilemaps")]
+    public void RebuildFromTilemaps()
+    {
+        for (int y = 0; y < _height; y++)
+            for (int x = 0; x < _width; x++)
+                _objs[x, y].Clear();
+
+        LoadTypeFromTilemap(_babaTilemap, ObjectType.Baba);
+        LoadTypeFromTilemap(_wallTilemap, ObjectType.Wall);
+        LoadTypeFromTilemap(_rockTilemap, ObjectType.Rock);
+        LoadTypeFromTilemap(_flagTilemap, ObjectType.Flag);
+
+        OnBoardChanged?.Invoke();
+    }
+
+    private void LoadTypeFromTilemap(Tilemap map, ObjectType type)
+    {
+        if (map == null) return;
+
+        for (int y = 0; y < _height; y++)
+            for (int x = 0; x < _width; x++)
+            {
+                var t = map.GetTile(ToCell(x, y));
+                if (t != null)
+                    _objs[x, y].Add(type);
+            }
+    }
+
+    private void RenderObjectPresence(int x, int y, ObjectType type, bool present)
+    {
+        if (_tiles == null) return;
+
+        var cell = ToCell(x, y);
+        Tilemap map = type switch
+        {
+            ObjectType.Baba => _babaTilemap,
+            ObjectType.Wall => _wallTilemap,
+            ObjectType.Rock => _rockTilemap,
+            ObjectType.Flag => _flagTilemap,
+            _ => null
+        };
+        if (map == null) return;
+
+        map.SetTile(cell, present ? _tiles.GetObjectTile(type) : null);
     }
 }

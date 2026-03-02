@@ -21,7 +21,6 @@ public class TilemapPlayerInputMover : MonoBehaviour
         Vector2Int dir = GetDirDown();
         if (dir == Vector2Int.zero) return;
 
-        // 모든 YOU 오브젝트 수집
         var movers = new List<(ObjectType type, Vector2Int pos)>();
 
         foreach (ObjectType t in Enum.GetValues(typeof(ObjectType)))
@@ -36,73 +35,55 @@ public class TilemapPlayerInputMover : MonoBehaviour
 
         if (movers.Count == 0) return;
 
-        // 이동 방향 기준으로 앞쪽부터 처리 (겹침 방지)
+        // 방향 기준 정렬(기존 유지)
         movers.Sort((a, b) =>
         {
             if (dir == Vector2Int.right) return b.pos.x.CompareTo(a.pos.x);
             if (dir == Vector2Int.left) return a.pos.x.CompareTo(b.pos.x);
             if (dir == Vector2Int.up) return b.pos.y.CompareTo(a.pos.y);
-            return a.pos.y.CompareTo(b.pos.y); // down
+            return a.pos.y.CompareTo(b.pos.y);
         });
 
         foreach (var m in movers)
-        {
             TryMoveYou(m.type, m.pos, dir);
-        }
     }
 
-    // =========================
-    // YOU 이동 (텍스트는 항상 PUSH)
-    // =========================
     private bool TryMoveYou(ObjectType mover, Vector2Int from, Vector2Int dir)
     {
         Vector2Int to = from + dir;
         if (!_board.InRange(to.x, to.y)) return false;
 
-        // 1) 목적지에 오브젝트가 있으면 처리
-        var targetObj = _board.GetObject(to.x, to.y);
-        bool willWin = (targetObj != ObjectType.None) && (_gm != null && _gm.IsWin(targetObj));
-
-        if (targetObj != ObjectType.None)
-        {
-            // WIN은 "겹치기(먹기)" 허용
-            if (!willWin)
-            {
-                if (_gm != null && _gm.IsStop(targetObj)) return false;
-
-                if (_gm != null && _gm.IsPush(targetObj))
-                {
-                    if (!TryShiftObjectAt(to, dir)) return false;
-                }
-                else
-                {
-                    // STOP도 아니고 PUSH도 아닌 오브젝트는 겹치지 못하게 막음(원작 감성)
-                    return false;
-                }
-            }
-        }
-
-        // 2) 목적지에 텍스트가 있으면 무조건 밀기 (항상 PUSH)
+        // 1) 텍스트는 항상 밀기(칸당 1개 유지)
         var targetText = _board.GetText(to.x, to.y);
         if (targetText != TextType.None)
         {
             if (!TryShiftTextAt(to, dir)) return false;
         }
 
-        // 3) 승리 체크 (덮어쓰기 전에 해야 WIN을 읽을 수 있음)
-        if (willWin)
-            _gm?.CheckWinAt(to);
+        // 2) 목적지 오브젝트 처리
+        var targets = _board.GetObjects(to.x, to.y);
 
-        // 4) 이동
-        _board.SetObject(to.x, to.y, mover);
-        _board.SetObject(from.x, from.y, ObjectType.None);
+        // STOP 하나라도 있으면 못감
+        for (int i = 0; i < targets.Count; i++)
+        {
+            if (_gm != null && _gm.IsStop(targets[i]))
+                return false;
+        }
+
+        // PUSH 전부 밀기
+        if (!TryShiftAllPushObjectsAt(to, dir))
+            return false;
+
+        // 3) 이동(겹침): 목적지는 유지, mover만 옮김
+        _board.MoveObjectOnce(from.x, from.y, to.x, to.y, mover);
+
+        // 4) 승리 체크
+        _gm?.CheckWinAt(to);
 
         return true;
     }
 
-    // =========================
-    // 텍스트 밀기 (항상 PUSH)
-    // =========================
+    // 텍스트 밀기(항상 PUSH) - 칸당 1개 유지
     private bool TryShiftTextAt(Vector2Int from, Vector2Int dir)
     {
         var movingText = _board.GetText(from.x, from.y);
@@ -111,74 +92,51 @@ public class TilemapPlayerInputMover : MonoBehaviour
         Vector2Int to = from + dir;
         if (!_board.InRange(to.x, to.y)) return false;
 
-        // 목적지 오브젝트 처리
-        var targetObj = _board.GetObject(to.x, to.y);
-        if (targetObj != ObjectType.None)
-        {
-            if (_gm != null && _gm.IsStop(targetObj)) return false;
+        // 목적지 STOP 있으면 막힘
+        var objs = _board.GetObjects(to.x, to.y);
+        for (int i = 0; i < objs.Count; i++)
+            if (_gm != null && _gm.IsStop(objs[i])) return false;
 
-            if (_gm != null && _gm.IsPush(targetObj))
-            {
-                if (!TryShiftObjectAt(to, dir)) return false;
-            }
-            else
-            {
-                // PUSH가 아닌 오브젝트는 텍스트도 겹치지 못하게 막음(원작 감성)
-                return false;
-            }
-        }
+        // 목적지 PUSH는 먼저 밀기
+        if (!TryShiftAllPushObjectsAt(to, dir)) return false;
 
-        // 목적지 텍스트 처리(연쇄 밀기)
-        var targetText = _board.GetText(to.x, to.y);
-        if (targetText != TextType.None)
-        {
+        // 목적지 텍스트 연쇄
+        var t = _board.GetText(to.x, to.y);
+        if (t != TextType.None)
             if (!TryShiftTextAt(to, dir)) return false;
-        }
 
-        // 이동
         _board.SetText(to.x, to.y, movingText);
         _board.SetText(from.x, from.y, TextType.None);
-
         return true;
     }
 
-    // =========================
-    // 오브젝트 밀기 (PUSH 대상만)
-    // =========================
-    private bool TryShiftObjectAt(Vector2Int from, Vector2Int dir)
+    // 오브젝트 밀기: from 칸에 있는 PUSH 전부를 1칸 밀기(연쇄)
+    private bool TryShiftAllPushObjectsAt(Vector2Int from, Vector2Int dir)
     {
-        var movingObj = _board.GetObject(from.x, from.y);
-        if (movingObj == ObjectType.None) return true;
+        var here = _board.GetObjects(from.x, from.y);
+
+        // from 칸의 PUSH들 스냅샷
+        var pushList = new List<ObjectType>();
+        for (int i = 0; i < here.Count; i++)
+            if (_gm != null && _gm.IsPush(here[i]))
+                pushList.Add(here[i]);
+
+        if (pushList.Count == 0) return true;
 
         Vector2Int to = from + dir;
         if (!_board.InRange(to.x, to.y)) return false;
 
-        // 목적지 오브젝트 처리
-        var targetObj = _board.GetObject(to.x, to.y);
-        if (targetObj != ObjectType.None)
-        {
-            if (_gm != null && _gm.IsStop(targetObj)) return false;
+        // 목적지 STOP이면 불가
+        var targets = _board.GetObjects(to.x, to.y);
+        for (int i = 0; i < targets.Count; i++)
+            if (_gm != null && _gm.IsStop(targets[i])) return false;
 
-            if (_gm != null && _gm.IsPush(targetObj))
-            {
-                if (!TryShiftObjectAt(to, dir)) return false;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        // 목적지에도 PUSH가 있으면 먼저 연쇄 밀기
+        if (!TryShiftAllPushObjectsAt(to, dir)) return false;
 
-        // 목적지 텍스트 처리(텍스트는 항상 PUSH)
-        var targetText = _board.GetText(to.x, to.y);
-        if (targetText != TextType.None)
-        {
-            if (!TryShiftTextAt(to, dir)) return false;
-        }
-
-        // 이동
-        _board.SetObject(to.x, to.y, movingObj);
-        _board.SetObject(from.x, from.y, ObjectType.None);
+        // from의 PUSH들을 전부 to로 이동
+        for (int i = 0; i < pushList.Count; i++)
+            _board.MoveObjectOnce(from.x, from.y, to.x, to.y, pushList[i]);
 
         return true;
     }

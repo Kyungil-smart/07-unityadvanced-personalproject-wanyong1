@@ -24,21 +24,22 @@ public class TilemapLevelIO : MonoBehaviour
         var data = new LevelData
         {
             width = _board.Width,
-            height = _board.Height
+            height = _board.Height,
+            origin = Vector2Int.zero // 지금 보드는 내부좌표 기준이라 일단 0,0 저장
         };
 
-        // TilemapBoardManager의 origin은 private이라,
-        // 지금 구조에선 JSON에 origin을 '0,0'으로 저장(보드 내부 좌표 기반 저장이라 문제 없음)
-        data.origin = Vector2Int.zero;
-
-        // 보드 범위 전체 스캔 -> None 아닌 것만 저장
+        // 멀티 오브젝트: 각 칸의 리스트를 전부 저장
         for (int y = 0; y < _board.Height; y++)
         {
             for (int x = 0; x < _board.Width; x++)
             {
-                var obj = _board.GetObject(x, y);
-                if (obj != ObjectType.None)
-                    data.objects.Add(new ObjectCell { x = x, y = y, type = obj });
+                var objs = _board.GetObjects(x, y);
+                for (int i = 0; i < objs.Count; i++)
+                {
+                    var obj = objs[i];
+                    if (obj != ObjectType.None)
+                        data.objects.Add(new ObjectEntry { x = x, y = y, type = obj });
+                }
 
                 var txt = _board.GetText(x, y);
                 if (txt != TextType.None)
@@ -70,21 +71,29 @@ public class TilemapLevelIO : MonoBehaviour
         var json = File.ReadAllText(FullPath);
         var data = JsonUtility.FromJson<LevelData>(json);
 
-        // 1) 기존 보드 비우기 (칸당 1개 구조라 전부 None으로)
+        // 1) 기존 보드 비우기 (멀티 오브젝트는 RemoveObjectOnce로 싹 비워야 함)
         for (int y = 0; y < _board.Height; y++)
         {
             for (int x = 0; x < _board.Width; x++)
             {
-                _board.SetObject(x, y, ObjectType.None);
+                // 오브젝트: 리스트가 빌 때까지 제거
+                var objs = _board.GetObjects(x, y);
+                // GetObjects는 IReadOnlyList라서, 안전하게 "현재 리스트 스냅샷"을 돌며 제거
+                for (int i = objs.Count - 1; i >= 0; i--)
+                {
+                    _board.RemoveObjectOnce(x, y, objs[i]);
+                }
+
+                // 텍스트: 단일
                 _board.SetText(x, y, TextType.None);
             }
         }
 
-        // 2) JSON 데이터로 복원
+        // 2) JSON 복원
         if (data.objects != null)
         {
-            foreach (var c in data.objects)
-                _board.SetObject(c.x, c.y, c.type);
+            foreach (var e in data.objects)
+                _board.AddObject(e.x, e.y, e.type);
         }
 
         if (data.texts != null)
@@ -96,8 +105,6 @@ public class TilemapLevelIO : MonoBehaviour
         Debug.Log($"[TilemapLevelIO] Loaded: {FullPath}\nObjects={data.objects?.Count ?? 0}, Texts={data.texts?.Count ?? 0}");
     }
 
-    // 편의용: 에디터에서 빠르게 저장/로드하고 싶으면 사용
-    // (Input System 충돌 피하려고 UnityEngine.Input 안 씀)
     public void SaveAs(string fileName)
     {
         _fileName = fileName;

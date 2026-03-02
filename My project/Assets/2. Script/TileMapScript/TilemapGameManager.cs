@@ -52,12 +52,15 @@ public class TilemapGameManager : MonoBehaviour
 
     public void CheckWinAt(Vector2Int pos)
     {
-        // YOU가 이동한 칸에 WIN 오브젝트가 있으면 승리
-        var obj = _board.GetObject(pos.x, pos.y);
-        if (obj != ObjectType.None && IsWin(obj))
+        var objs = _board.GetObjects(pos.x, pos.y);
+        for (int i = 0; i < objs.Count; i++)
         {
-            HasWon = true;
-            Debug.Log("[Tilemap] YOU touched WIN!");
+            if (IsWin(objs[i]))
+            {
+                HasWon = true;
+                Debug.Log("[Tilemap] YOU touched WIN!");
+                return;
+            }
         }
     }
 }
