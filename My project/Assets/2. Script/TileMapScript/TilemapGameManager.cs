@@ -77,8 +77,7 @@ public class TilemapGameManager : MonoBehaviour
                 var list = _board.GetObjects(x, y);
                 if (list.Count == 0) continue;
 
-                // 변환 중 컬렉션 변경 방지용: 현재 칸에 들어있는 것들을 "그대로 인덱스로" 훑으면서
-                // from 1개를 제거 + to 1개를 추가
+              
                 for (int i = 0; i < list.Count; i++)
                 {
                     var from = list[i];
