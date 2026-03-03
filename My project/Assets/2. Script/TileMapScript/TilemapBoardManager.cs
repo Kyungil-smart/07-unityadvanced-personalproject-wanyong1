@@ -31,6 +31,22 @@ public class TilemapBoardManager : MonoBehaviour
     // Cell -> multi objects
     private List<ObjectType>[,] _objs;
 
+    // batch/suppress notify (Object IS Object 변환 같은 "대량 갱신"에서 재귀 RebuildRules 방지)
+    private int _suppressNotifyDepth = 0;
+    private void NotifyChanged()
+    {
+        if (_suppressNotifyDepth > 0) return;
+        OnBoardChanged?.Invoke();
+    }
+
+    public void BeginBatch() => _suppressNotifyDepth++;
+
+    public void EndBatch(bool notify = true)
+    {
+        _suppressNotifyDepth = Mathf.Max(0, _suppressNotifyDepth - 1);
+        if (notify) NotifyChanged();
+    }
+
     private void Awake()
     {
         if (_textTilemap == null) Debug.LogWarning("[TilemapBoardManager] TextTilemap missing.");
@@ -69,19 +85,13 @@ public class TilemapBoardManager : MonoBehaviour
     public IReadOnlyList<ObjectType> GetObjects(int x, int y)
         => InRange(x, y) ? _objs[x, y] : Array.Empty<ObjectType>();
 
-    public bool HasObject(int x, int y, ObjectType type)
-    {
-        if (!InRange(x, y)) return false;
-        return _objs[x, y].Contains(type);
-    }
-
     public void AddObject(int x, int y, ObjectType type)
     {
         if (!InRange(x, y) || type == ObjectType.None) return;
 
         _objs[x, y].Add(type);
         RenderObjectPresence(x, y, type, present: true);
-        OnBoardChanged?.Invoke();
+        NotifyChanged();
     }
 
     public bool RemoveObjectOnce(int x, int y, ObjectType type)
@@ -98,7 +108,7 @@ public class TilemapBoardManager : MonoBehaviour
         bool still = list.Contains(type);
         RenderObjectPresence(x, y, type, present: still);
 
-        OnBoardChanged?.Invoke();
+        NotifyChanged();
         return true;
     }
 
@@ -114,7 +124,6 @@ public class TilemapBoardManager : MonoBehaviour
         for (int y = 0; y < _height; y++)
             for (int x = 0; x < _width; x++)
             {
-                // 같은 칸에 여러 개면 개수만큼 반환(원작스럽게)
                 int count = 0;
                 var list = _objs[x, y];
                 for (int i = 0; i < list.Count; i++)
@@ -140,7 +149,7 @@ public class TilemapBoardManager : MonoBehaviour
     {
         if (!InRange(x, y) || _tiles == null || _textTilemap == null) return;
         _textTilemap.SetTile(ToCell(x, y), _tiles.GetTextTile(type));
-        OnBoardChanged?.Invoke();
+        NotifyChanged();
     }
 
     // ======================
@@ -149,6 +158,8 @@ public class TilemapBoardManager : MonoBehaviour
     [ContextMenu("Rebuild From Tilemaps")]
     public void RebuildFromTilemaps()
     {
+        BeginBatch();
+
         for (int y = 0; y < _height; y++)
             for (int x = 0; x < _width; x++)
                 _objs[x, y].Clear();
@@ -158,7 +169,7 @@ public class TilemapBoardManager : MonoBehaviour
         LoadTypeFromTilemap(_rockTilemap, ObjectType.Rock);
         LoadTypeFromTilemap(_flagTilemap, ObjectType.Flag);
 
-        OnBoardChanged?.Invoke();
+        EndBatch(notify: true);
     }
 
     private void LoadTypeFromTilemap(Tilemap map, ObjectType type)

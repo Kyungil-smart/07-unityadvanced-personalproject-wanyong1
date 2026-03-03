@@ -51,8 +51,18 @@ public static class TilemapRuleScanner
         var c = board.GetText(cx, cy);
 
         if (!IsNoun(a)) return;
-        if (!IsProperty(c)) return;
 
-        rules.Add(ToObjectType(a), c);
+        // 1) Noun IS Property
+        if (IsProperty(c))
+        {
+            rules.Add(ToObjectType(a), c);
+            return;
+        }
+
+        // 2) Noun IS Noun (Object IS Object)
+        if (IsNoun(c))
+        {
+            rules.AddTransform(ToObjectType(a), ToObjectType(c));
+        }
     }
 }
