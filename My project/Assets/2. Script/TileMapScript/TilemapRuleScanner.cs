@@ -32,11 +32,12 @@ public static class TilemapRuleScanner
             {
                 if (board.GetText(x, y) != TextType.Is) continue;
 
-                // 가로: left - IS - right
+                // left - IS - right
                 TryAdd(board, rules, x - 1, y, x, y, x + 1, y);
-
-                // 세로: down - IS - up
-                TryAdd(board, rules, x, y - 1, x, y, x, y + 1);
+               
+                // up - IS - down
+                TryAdd(board, rules, x, y + 1, x, y, x, y - 1);
+                
             }
 
         return rules;
