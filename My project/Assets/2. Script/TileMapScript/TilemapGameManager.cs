@@ -14,6 +14,9 @@ public class TilemapGameManager : MonoBehaviour
     public bool IsStop(ObjectType t) => HasRule(t, TextType.Stop);
     public bool IsPush(ObjectType t) => HasRule(t, TextType.Push);
     public bool IsWin(ObjectType t) => HasRule(t, TextType.Win);
+    public bool IsHot(ObjectType t) => HasRule(t, TextType.Hot);
+    public bool IsMelt(ObjectType t) => HasRule(t, TextType.Melt);
+    public bool IsDefeat(ObjectType t) => HasRule(t, TextType.Defeat);
 
     private void Awake()
     {
@@ -109,4 +112,37 @@ public class TilemapGameManager : MonoBehaviour
             }
         }
     }
+    public bool ResolveAfterMove(Vector2Int pos, ObjectType mover)
+    {
+        if (_board == null) return true;
+
+        var objs = _board.GetObjects(pos.x, pos.y);
+
+        bool hasDefeat = false;
+        bool hasHot = false;
+
+        for (int i = 0; i < objs.Count; i++)
+        {
+            var o = objs[i];
+            if (IsDefeat(o)) hasDefeat = true;
+            if (IsHot(o)) hasHot = true;
+        }
+
+        // 1) DEFEAT: ¹âÀ¸¸é Á×À½
+        if (hasDefeat)
+        {
+            _board.RemoveObjectOnce(pos.x, pos.y, mover);
+            return false;
+        }
+
+        // 2) HOT + MELT: mover°¡ MELT¸é HOT ÀÖ´Â Ä­¿¡¼­ Á×À½
+        if (hasHot && IsMelt(mover))
+        {
+            _board.RemoveObjectOnce(pos.x, pos.y, mover);
+            return false;
+        }
+
+        return true;
+    }
+
 }

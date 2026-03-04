@@ -12,12 +12,13 @@ public static class CellType
     public enum ObjectType
     {
         None, 
-        Baba,Wall,Rock,Flag,
+        Baba,Wall,Rock,Flag,Lava, Skull
     }
     public enum TextType
     {
         None,
         Baba,Rock,Wall,Flag,
-        You,Push,Stop,Win,Is
+        You,Push,Stop,Win,Is,
+        Hot, Defeat, Melt, Lava , Skull
     }
 }

@@ -11,6 +11,8 @@ public class TilemapBoardManager : MonoBehaviour
     [SerializeField] private Tilemap _wallTilemap;
     [SerializeField] private Tilemap _rockTilemap;
     [SerializeField] private Tilemap _flagTilemap;
+    [SerializeField] private Tilemap _lavaTilemap;
+    [SerializeField] private Tilemap _skullTilemap;
 
     [Header("Text Tilemap")]
     [SerializeField] private Tilemap _textTilemap;
@@ -168,6 +170,8 @@ public class TilemapBoardManager : MonoBehaviour
         LoadTypeFromTilemap(_wallTilemap, ObjectType.Wall);
         LoadTypeFromTilemap(_rockTilemap, ObjectType.Rock);
         LoadTypeFromTilemap(_flagTilemap, ObjectType.Flag);
+        LoadTypeFromTilemap(_lavaTilemap, ObjectType.Lava);
+        LoadTypeFromTilemap(_skullTilemap, ObjectType.Skull);
 
         EndBatch(notify: true);
     }
@@ -196,6 +200,8 @@ public class TilemapBoardManager : MonoBehaviour
             ObjectType.Wall => _wallTilemap,
             ObjectType.Rock => _rockTilemap,
             ObjectType.Flag => _flagTilemap,
+            ObjectType.Lava => _lavaTilemap,
+            ObjectType.Skull => _skullTilemap,
             _ => null
         };
         if (map == null) return;

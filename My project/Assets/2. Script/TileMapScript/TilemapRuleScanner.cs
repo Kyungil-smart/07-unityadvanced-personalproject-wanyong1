@@ -4,10 +4,21 @@ using static CellType;
 public static class TilemapRuleScanner
 {
     private static bool IsProperty(TextType t)
-        => t == TextType.You || t == TextType.Push || t == TextType.Stop || t == TextType.Win;
+        => t == TextType.You
+        || t == TextType.Push
+        || t == TextType.Stop
+        || t == TextType.Win
+        || t == TextType.Hot
+        || t == TextType.Defeat
+        || t == TextType.Melt;
 
     private static bool IsNoun(TextType t)
-        => t == TextType.Baba || t == TextType.Rock || t == TextType.Wall || t == TextType.Flag;
+        => t == TextType.Baba
+        || t == TextType.Rock
+        || t == TextType.Wall
+        || t == TextType.Flag
+        || t == TextType.Lava
+        || t == TextType.Skull;
 
     private static ObjectType ToObjectType(TextType noun)
     {
@@ -17,6 +28,8 @@ public static class TilemapRuleScanner
             TextType.Rock => ObjectType.Rock,
             TextType.Wall => ObjectType.Wall,
             TextType.Flag => ObjectType.Flag,
+            TextType.Lava => ObjectType.Lava,
+            TextType.Skull => ObjectType.Skull,
             _ => ObjectType.None
         };
     }
