@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using static CellType;
 
@@ -6,7 +7,11 @@ public class TilemapGameManager : MonoBehaviour
     [SerializeField] private TilemapBoardManager _board;
 
     private RuleSet _rules;
+
     public bool HasWon { get; private set; }
+
+    // 클리어 알림 이벤트
+    public event Action OnWon;
 
     private bool _isApplyingTransforms;
 
@@ -17,6 +22,11 @@ public class TilemapGameManager : MonoBehaviour
     public bool IsHot(ObjectType t) => HasRule(t, TextType.Hot);
     public bool IsMelt(ObjectType t) => HasRule(t, TextType.Melt);
     public bool IsDefeat(ObjectType t) => HasRule(t, TextType.Defeat);
+
+    [Header("Stage Progress")]
+    [SerializeField] private int _stageIndex0Based = 0; // Stage1=0, Stage2=1
+    [SerializeField] private int _totalStages = 4;
+    private bool _savedClearOnce = false;
 
     private void Awake()
     {
@@ -37,6 +47,7 @@ public class TilemapGameManager : MonoBehaviour
 
     private void Start()
     {
+        _savedClearOnce = false;
         RebuildRules();
     }
 
@@ -46,24 +57,15 @@ public class TilemapGameManager : MonoBehaviour
 
         _rules = TilemapRuleScanner.Build(_board);
 
-        Debug.Log($"[Tilemap] Rules={_rules.RuleCount}");
-        foreach (var kv in _rules.Pairs)
-            foreach (var prop in kv.Value)
-                Debug.Log($"{kv.Key} IS {prop}");
-
-        foreach (var tr in _rules.TransformPairs)
-            Debug.Log($"{tr.Key} IS {tr.Value}");
-
         ApplyObjectTransforms();
 
+        // 룰이 바뀌면 승리상태는 다시 false (기존 로직 유지)
         HasWon = false;
     }
 
     private bool HasRule(ObjectType subject, TextType property)
         => _rules != null && _rules.Has(subject, property);
 
-    // Object IS Object 적용
-    // 예) BABA IS WALL 이면 보드의 Baba를 Wall로 치환
     private void ApplyObjectTransforms()
     {
         if (_board == null || _rules == null) return;
@@ -80,7 +82,6 @@ public class TilemapGameManager : MonoBehaviour
                 var list = _board.GetObjects(x, y);
                 if (list.Count == 0) continue;
 
-              
                 for (int i = 0; i < list.Count; i++)
                 {
                     var from = list[i];
@@ -101,17 +102,26 @@ public class TilemapGameManager : MonoBehaviour
 
     public void CheckWinAt(Vector2Int pos)
     {
+        if (HasWon) return; //이미 클리어면 중복 호출 방지
+
         var objs = _board.GetObjects(pos.x, pos.y);
         for (int i = 0; i < objs.Count; i++)
         {
             if (IsWin(objs[i]))
             {
                 HasWon = true;
+                if(!_savedClearOnce)
+                { 
+                    StageProgressIO.MarkCleared(_stageIndex0Based, _totalStages);
+                    _savedClearOnce = true;
+                }
+                OnWon?.Invoke(); // UI가 뜨게 된다
                 Debug.Log("[Tilemap] YOU touched WIN!");
                 return;
             }
         }
     }
+
     public bool ResolveAfterMove(Vector2Int pos, ObjectType mover)
     {
         if (_board == null) return true;
@@ -128,14 +138,12 @@ public class TilemapGameManager : MonoBehaviour
             if (IsHot(o)) hasHot = true;
         }
 
-        // 1) DEFEAT: 밟으면 죽음
         if (hasDefeat)
         {
             _board.RemoveObjectOnce(pos.x, pos.y, mover);
             return false;
         }
 
-        // 2) HOT + MELT: mover가 MELT면 HOT 있는 칸에서 죽음
         if (hasHot && IsMelt(mover))
         {
             _board.RemoveObjectOnce(pos.x, pos.y, mover);
@@ -144,5 +152,4 @@ public class TilemapGameManager : MonoBehaviour
 
         return true;
     }
-
 }
