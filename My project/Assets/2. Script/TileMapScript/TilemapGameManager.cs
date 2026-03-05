@@ -110,8 +110,12 @@ public class TilemapGameManager : MonoBehaviour
             if (IsWin(objs[i]))
             {
                 HasWon = true;
-                if(!_savedClearOnce)
-                { 
+
+                // Clear SFX
+                AudioManager.Instance?.PlayClear();
+
+                if (!_savedClearOnce)
+                {
                     StageProgressIO.MarkCleared(_stageIndex0Based, _totalStages);
                     _savedClearOnce = true;
                 }
@@ -140,12 +144,18 @@ public class TilemapGameManager : MonoBehaviour
 
         if (hasDefeat)
         {
+            // Dead SFX
+            AudioManager.Instance?.PlayDead();
+
             _board.RemoveObjectOnce(pos.x, pos.y, mover);
             return false;
         }
 
         if (hasHot && IsMelt(mover))
         {
+            // Dead SFX
+            AudioManager.Instance?.PlayDead();
+
             _board.RemoveObjectOnce(pos.x, pos.y, mover);
             return false;
         }

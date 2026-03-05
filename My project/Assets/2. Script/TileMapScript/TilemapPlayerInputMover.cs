@@ -8,6 +8,7 @@ public class TilemapPlayerInputMover : MonoBehaviour
     [SerializeField] private TilemapBoardManager _board;
     [SerializeField] private TilemapGameManager _gm;
     [SerializeField] private TilemapUndoManager _undo;
+
     private void Awake()
     {
         if (_board == null) _board = FindFirstObjectByType<TilemapBoardManager>();
@@ -47,10 +48,16 @@ public class TilemapPlayerInputMover : MonoBehaviour
             return a.pos.y.CompareTo(b.pos.y);
         });
 
+        // 그 턴에 실제로 이동이 1번이라도 성공하면 한 번만 소리
+        bool anyMoved = false;
+
         foreach (var m in movers)
-            TryMoveYou(m.type, m.pos, dir);
+            anyMoved |= TryMoveYou(m.type, m.pos, dir);
 
         _undo?.EndMove();
+
+        if (anyMoved)
+            AudioManager.Instance?.PlayMove();
     }
 
     private bool TryMoveYou(ObjectType mover, Vector2Int from, Vector2Int dir)
