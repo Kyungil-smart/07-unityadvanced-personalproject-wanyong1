@@ -99,4 +99,16 @@ public sealed class AudioManager : MonoBehaviour
     public void PlayMove(float volumeScale = 1f) => PlaySfx(_moveClip, volumeScale);
     public void PlayDead(float volumeScale = 1f) => PlaySfx(_deadClip, volumeScale);
     public void PlayClear(float volumeScale = 1f) => PlaySfx(_clearClip, volumeScale);
+
+    public void PauseBgm()
+    {
+        if (_bgmSource == null) return;
+        if (_bgmSource.isPlaying) _bgmSource.Pause();
+    }
+
+    public void ResumeBgm()
+    {
+        if (_bgmSource == null) return;
+        _bgmSource.UnPause();
+    }
 }

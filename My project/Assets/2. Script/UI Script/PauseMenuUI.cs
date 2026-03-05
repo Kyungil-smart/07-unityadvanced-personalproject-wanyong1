@@ -45,6 +45,9 @@ public class PauseMenuUI : MonoBehaviour
             pausePanel.SetActive(true);
 
         Time.timeScale = 0f;
+
+        // BGM 일시정지
+        AudioManager.Instance?.PauseBgm();
     }
 
     private void ResumeGame()
@@ -55,11 +58,18 @@ public class PauseMenuUI : MonoBehaviour
             pausePanel.SetActive(false);
 
         Time.timeScale = 1f;
+
+        // BGM 다시 재생
+        AudioManager.Instance?.ResumeBgm();
     }
 
     private void GoMainMenu()
     {
+        // 메뉴 나갈 때는 일시정지 풀고 씬 이동
         Time.timeScale = 1f;
+
+        AudioManager.Instance?.StopBgm();
+
         SceneManager.LoadScene(mainMenuScene);
     }
 }
