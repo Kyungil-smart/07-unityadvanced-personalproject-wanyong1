@@ -1,0 +1,65 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class PauseMenuUI : MonoBehaviour
+{
+    [Header("UI")]
+    [SerializeField] private GameObject pausePanel;
+    [SerializeField] private Button resumeButton;
+    [SerializeField] private Button mainMenuButton;
+
+    [Header("Scene")]
+    [SerializeField] private string mainMenuScene = "";
+
+    private bool isPaused;
+
+    private void Awake()
+    {
+        if (pausePanel != null)
+            pausePanel.SetActive(false);
+
+        if (resumeButton != null)
+            resumeButton.onClick.AddListener(ResumeGame);
+
+        if (mainMenuButton != null)
+            mainMenuButton.onClick.AddListener(GoMainMenu);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (isPaused)
+                ResumeGame();
+            else
+                PauseGame();
+        }
+    }
+
+    private void PauseGame()
+    {
+        isPaused = true;
+
+        if (pausePanel != null)
+            pausePanel.SetActive(true);
+
+        Time.timeScale = 0f;
+    }
+
+    private void ResumeGame()
+    {
+        isPaused = false;
+
+        if (pausePanel != null)
+            pausePanel.SetActive(false);
+
+        Time.timeScale = 1f;
+    }
+
+    private void GoMainMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(mainMenuScene);
+    }
+}
