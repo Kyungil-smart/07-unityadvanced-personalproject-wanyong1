@@ -256,6 +256,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 20567782}
   m_CullTransparentMesh: 1
+--- !u!1 &163288043
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 163288046}
+  - component: {fileID: 163288045}
+  - component: {fileID: 163288044}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &163288044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 163288043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4e2d62da87de3647a1b4c973a2f94df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _sceneBgms:
+  - sceneName: MainGameUI
+    clip: {fileID: 8300000, guid: 56edbaeab4d635b488605de88b5391b5, type: 3}
+  - sceneName: LevelSelect
+    clip: {fileID: 8300000, guid: 9eadb64a05696654aba0c2083217be2a, type: 3}
+  - sceneName: Stage 1
+    clip: {fileID: 8300000, guid: 1064bd12490b46545a7d612a84b011ea, type: 3}
+  - sceneName: Stage 2
+    clip: {fileID: 8300000, guid: 1064bd12490b46545a7d612a84b011ea, type: 3}
+  - sceneName: Stage 3
+    clip: {fileID: 8300000, guid: 1064bd12490b46545a7d612a84b011ea, type: 3}
+  - sceneName: Stage 4
+    clip: {fileID: 8300000, guid: 1064bd12490b46545a7d612a84b011ea, type: 3}
+  _stagePrefix: Stage
+  _stageFallbackClip: {fileID: 0}
+  _mainMenuSceneName: MainMenu
+  _mainMenuFallbackClip: {fileID: 0}
+  _restartEvenIfSameClip: 0
+--- !u!114 &163288045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 163288043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa32529f61c0f96438a818366453be7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &163288046
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 163288043}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.9535904, y: 12.762824, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &578437262
 GameObject:
   m_ObjectHideFlags: 0
@@ -2270,3 +2345,4 @@ SceneRoots:
   - {fileID: 761581220}
   - {fileID: 578437266}
   - {fileID: 1168872867}
+  - {fileID: 163288046}
