@@ -7,11 +7,12 @@ public class TilemapPlayerInputMover : MonoBehaviour
 {
     [SerializeField] private TilemapBoardManager _board;
     [SerializeField] private TilemapGameManager _gm;
-
+    [SerializeField] private TilemapUndoManager _undo;
     private void Awake()
     {
         if (_board == null) _board = FindFirstObjectByType<TilemapBoardManager>();
         if (_gm == null) _gm = FindFirstObjectByType<TilemapGameManager>();
+        if (_undo == null) _undo = FindFirstObjectByType<TilemapUndoManager>();
     }
 
     private void Update()
@@ -35,6 +36,8 @@ public class TilemapPlayerInputMover : MonoBehaviour
 
         if (movers.Count == 0) return;
 
+        _undo?.BeginMove();   //이동 처리 전 스냅샷
+
         // 방향 기준 정렬(기존 유지)
         movers.Sort((a, b) =>
         {
@@ -46,6 +49,8 @@ public class TilemapPlayerInputMover : MonoBehaviour
 
         foreach (var m in movers)
             TryMoveYou(m.type, m.pos, dir);
+
+        _undo?.EndMove();
     }
 
     private bool TryMoveYou(ObjectType mover, Vector2Int from, Vector2Int dir)

@@ -208,4 +208,21 @@ public class TilemapBoardManager : MonoBehaviour
 
         map.SetTile(cell, present ? _tiles.GetObjectTile(type) : null);
     }
+    public void ClearAllTilesFast()
+    {
+        if (_babaTilemap != null) _babaTilemap.ClearAllTiles();
+        if (_wallTilemap != null) _wallTilemap.ClearAllTiles();
+        if (_rockTilemap != null) _rockTilemap.ClearAllTiles();
+        if (_flagTilemap != null) _flagTilemap.ClearAllTiles();
+        if (_lavaTilemap != null) _lavaTilemap.ClearAllTiles();
+        if (_skullTilemap != null) _skullTilemap.ClearAllTiles();
+        if (_textTilemap != null) _textTilemap.ClearAllTiles();
+    }
+
+    public void ClearAllLogicalFast()
+    {
+        for (int y = 0; y < _height; y++)
+            for (int x = 0; x < _width; x++)
+                _objs[x, y].Clear();
+    }
 }

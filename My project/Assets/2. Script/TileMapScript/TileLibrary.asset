@@ -22,7 +22,7 @@ MonoBehaviour:
   - type: 4
     tile: {fileID: 11400000, guid: 756d85a7bec537947a0819567fc26431, type: 2}
   - type: 5
-    tile: {fileID: 11400000, guid: 025815d7bbcdaba47ac378e4177e2922, type: 2}
+    tile: {fileID: 11400000, guid: ad92dfa36189ada489c5d2e46ed2fa35, type: 2}
   - type: 6
     tile: {fileID: 11400000, guid: 93c177a181f6257448c993e80f169ca4, type: 2}
   _textTiles:
