@@ -13,6 +13,12 @@ public class TileLibrarySO : ScriptableObject
         public TileBase tile;
     }
 
+    [Header("Baba Direction Tiles")]
+    public TileBase babaRight;
+    public TileBase babaLeft;
+    public TileBase babaUp;
+    public TileBase babaDown;
+
     [Serializable]
     public struct TextTilePair
     {

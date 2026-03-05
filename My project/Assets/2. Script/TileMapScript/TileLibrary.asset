@@ -12,9 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b1359ef3d88ede419aa4a6b16c04ae5, type: 3}
   m_Name: TileLibrary
   m_EditorClassIdentifier: 
+  babaRight: {fileID: 11400000, guid: 590d03df130f1d8488633a474c3cd4c4, type: 2}
+  babaLeft: {fileID: 11400000, guid: adf8c3bb780989740916dc960ac76022, type: 2}
+  babaUp: {fileID: 11400000, guid: 09430173357222a48ba827383b7ff630, type: 2}
+  babaDown: {fileID: 11400000, guid: 34d854d82a73d0c47a77937abde6d55e, type: 2}
   _objectTiles:
   - type: 1
-    tile: {fileID: 11400000, guid: 590d03df130f1d8488633a474c3cd4c4, type: 2}
+    tile: {fileID: 11400000, guid: 794dd99934219104abb1b6b000ee3e3c, type: 2}
   - type: 2
     tile: {fileID: 11400000, guid: b22b3d2046ae96442b95f90b43bcd4f8, type: 2}
   - type: 3

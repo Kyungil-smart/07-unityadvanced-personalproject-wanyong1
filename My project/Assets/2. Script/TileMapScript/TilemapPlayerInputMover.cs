@@ -81,6 +81,8 @@ public class TilemapPlayerInputMover : MonoBehaviour
 
         // 3) 이동(겹침): 목적지는 유지, mover만 옮김
         _board.MoveObjectOnce(from.x, from.y, to.x, to.y, mover);
+        if (mover == ObjectType.Baba)
+            _board.SetBabaFacing(to.x, to.y, dir);
 
         // 3.5) 이동 후 상호작용 처리 (DEFEAT, HOT+MELT 등)
         bool alive = _gm == null || _gm.ResolveAfterMove(to, mover);

@@ -30,10 +30,8 @@ public class TilemapBoardManager : MonoBehaviour
 
     public Action OnBoardChanged;
 
-    // Cell -> multi objects
     private List<ObjectType>[,] _objs;
 
-    // batch/suppress notify (Object IS Object 변환 같은 "대량 갱신"에서 재귀 RebuildRules 방지)
     private int _suppressNotifyDepth = 0;
     private void NotifyChanged()
     {
@@ -81,9 +79,7 @@ public class TilemapBoardManager : MonoBehaviour
         return InRange(x, y);
     }
 
-    // ======================
-    // Objects (multi)
-    // ======================
+    // Objects
     public IReadOnlyList<ObjectType> GetObjects(int x, int y)
         => InRange(x, y) ? _objs[x, y] : Array.Empty<ObjectType>();
 
@@ -137,9 +133,7 @@ public class TilemapBoardManager : MonoBehaviour
         return result;
     }
 
-    // ======================
     // Text (single)
-    // ======================
     public TextType GetText(int x, int y)
     {
         if (!InRange(x, y) || _tiles == null || _textTilemap == null) return TextType.None;
@@ -154,9 +148,8 @@ public class TilemapBoardManager : MonoBehaviour
         NotifyChanged();
     }
 
-    // ======================
     // Build from painted tilemaps
-    // ======================
+
     [ContextMenu("Rebuild From Tilemaps")]
     public void RebuildFromTilemaps()
     {
@@ -207,6 +200,7 @@ public class TilemapBoardManager : MonoBehaviour
         if (map == null) return;
 
         map.SetTile(cell, present ? _tiles.GetObjectTile(type) : null);
+        if (!present) map.SetTransformMatrix(cell, Matrix4x4.identity);
     }
     public void ClearAllTilesFast()
     {
@@ -224,5 +218,24 @@ public class TilemapBoardManager : MonoBehaviour
         for (int y = 0; y < _height; y++)
             for (int x = 0; x < _width; x++)
                 _objs[x, y].Clear();
+    }
+    public void SetBabaFacing(int x, int y, Vector2Int dir)
+    {
+        if (!InRange(x, y)) return;
+        if (_babaTilemap == null || _tiles == null) return;
+
+        var cell = ToCell(x, y);
+
+        TileBase target = _tiles.babaRight;
+
+        if (dir == Vector2Int.left) target = _tiles.babaLeft;
+        else if (dir == Vector2Int.up) target = _tiles.babaUp;
+        else if (dir == Vector2Int.down) target = _tiles.babaDown;
+        else target = _tiles.babaRight;
+
+        _babaTilemap.SetTile(cell, target);
+
+        // 이제 TransformMatrix 안 쓰니까 리셋도 필요 없음(있어도 무해)
+        _babaTilemap.SetTransformMatrix(cell, Matrix4x4.identity);
     }
 }

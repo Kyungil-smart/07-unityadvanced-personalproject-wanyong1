@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d1514134bc4fbd41bb739b1b9a49231, type: 3}
-  m_Name: T_baba
+  m_Name: T_baba(Down)
   m_EditorClassIdentifier: 
-  m_DefaultSprite: {fileID: 1407742176, guid: 946e8bf506ec17542a3207941174aa4e, type: 3}
+  m_DefaultSprite: {fileID: 1509712938, guid: 946e8bf506ec17542a3207941174aa4e, type: 3}
   m_DefaultGameObject: {fileID: 0}
   m_DefaultColliderType: 1
   m_TilingRules: []
