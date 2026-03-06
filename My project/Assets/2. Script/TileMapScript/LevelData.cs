@@ -11,7 +11,7 @@ public class LevelData
     public int height;
     public Vector2Int origin;
 
-    // 멀티 오브젝트 저장: 같은 칸에 여러 개면 entries가 여러 개 들어감
+    // 멀티 오브젝트 저장: 같은 칸에 여러 개면 여러 개 들어감
     public List<ObjectEntry> objects = new();
     public List<TextCell> texts = new();
 }

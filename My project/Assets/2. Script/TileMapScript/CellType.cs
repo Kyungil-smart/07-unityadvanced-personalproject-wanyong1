@@ -4,11 +4,6 @@ using UnityEngine;
 
 public static class CellType
 {
-    public enum CellLayer
-    {
-        objcet, Text
-    }
-
     public enum ObjectType
     {
         None,

@@ -37,9 +37,9 @@ public class TilemapPlayerInputMover : MonoBehaviour
 
         if (movers.Count == 0) return;
 
-        _undo?.BeginMove();   //이동 처리 전 스냅샷
+        _undo?.BeginMove();
 
-        // 방향 기준 정렬(기존 유지)
+        // 방향 기준 정렬
         movers.Sort((a, b) =>
         {
             if (dir == Vector2Int.right) return b.pos.x.CompareTo(a.pos.x);
@@ -65,7 +65,7 @@ public class TilemapPlayerInputMover : MonoBehaviour
         Vector2Int to = from + dir;
         if (!_board.InRange(to.x, to.y)) return false;
 
-        // 1) 텍스트는 항상 밀기(칸당 1개 유지)
+        // 1) 텍스트는 항상 밀기
         var targetText = _board.GetText(to.x, to.y);
         if (targetText != TextType.None)
         {
@@ -91,7 +91,7 @@ public class TilemapPlayerInputMover : MonoBehaviour
         if (mover == ObjectType.Baba)
             _board.SetBabaFacing(to.x, to.y, dir);
 
-        // 3.5) 이동 후 상호작용 처리 (DEFEAT, HOT+MELT 등)
+        // 3.5) 이동 후 상호작용 처리
         bool alive = _gm == null || _gm.ResolveAfterMove(to, mover);
         if (!alive) return true;
 
@@ -101,7 +101,7 @@ public class TilemapPlayerInputMover : MonoBehaviour
         return true;
     }
 
-    // 텍스트 밀기(항상 PUSH) - 칸당 1개 유지
+    // 텍스트 밀기
     private bool TryShiftTextAt(Vector2Int from, Vector2Int dir)
     {
         var movingText = _board.GetText(from.x, from.y);

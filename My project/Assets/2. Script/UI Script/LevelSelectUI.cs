@@ -15,17 +15,16 @@ public class LevelSelectUI : MonoBehaviour
     [SerializeField] private string mainSceneName = "";
 
     [Header("Alpha")]
-    [SerializeField, Range(0f, 1f)] private float clearedAlpha = 1f;      // 클리어: 불투명
-    [SerializeField, Range(0f, 1f)] private float unclearedAlpha = 0.35f; // 미클리어: 반투명
+    [SerializeField, Range(0f, 1f)] private float clearedAlpha = 1f;     
+    [SerializeField, Range(0f, 1f)] private float unclearedAlpha = 0.35f; 
 
     private StageProgress _progress;
 
     private void Awake()
     {
-        // 스테이지 버튼 클릭 이벤트 자동 연결
         for (int i = 0; i < stageButtons.Length; i++)
         {
-            int idx = i; // 캡처 주의
+            int idx = i; 
             stageButtons[i].onClick.RemoveAllListeners();
             stageButtons[i].onClick.AddListener(() => OnClickStage(idx));
         }
@@ -90,7 +89,6 @@ public class LevelSelectUI : MonoBehaviour
     {
         if (btn == null) return;
 
-        // 1) CanvasGroup으로 전체 알파 (텍스트 포함)
         var cg = btn.GetComponent<CanvasGroup>();
         if (cg == null) cg = btn.gameObject.AddComponent<CanvasGroup>();
         cg.alpha = alpha;

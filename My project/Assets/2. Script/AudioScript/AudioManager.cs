@@ -71,7 +71,7 @@ public sealed class AudioManager : MonoBehaviour
     {
         if (clip == null || _bgmSource == null) return;
 
-        // 같은 클립이고 이미 재생 중이면 그대로 유지(기본)
+        // 같은 클립이고 이미 재생 중이면 그대로 유지
         if (!restart && _bgmSource.isPlaying && _bgmSource.clip == clip)
             return;
 
@@ -92,7 +92,6 @@ public sealed class AudioManager : MonoBehaviour
         _sfxSource.PlayOneShot(clip, Mathf.Clamp01(volumeScale));
     }
 
-    //SFX helpers
     public void PlayMove(float volumeScale = 1f) => PlaySfx(_moveClip, volumeScale);
     public void PlayDead(float volumeScale = 1f) => PlaySfx(_deadClip, volumeScale);
     public void PlayClear(float volumeScale = 1f) => PlaySfx(_clearClip, volumeScale);
