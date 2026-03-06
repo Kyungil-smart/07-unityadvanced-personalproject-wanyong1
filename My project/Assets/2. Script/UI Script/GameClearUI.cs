@@ -43,7 +43,6 @@ public class GameClearUI : MonoBehaviour
 
         if (_clearPanel != null) _clearPanel.SetActive(true);
 
-        // 원하면 정지
         Time.timeScale = 0f;
     }
 
