@@ -299,6 +299,10 @@ MonoBehaviour:
     bgmClip: {fileID: 8300000, guid: 3e2e1b42e9950754899bef9d3c859224, type: 3}
   - sceneName: Stage 4
     bgmClip: {fileID: 8300000, guid: 3e2e1b42e9950754899bef9d3c859224, type: 3}
+  - sceneName: Stage 5
+    bgmClip: {fileID: 8300000, guid: 3e2e1b42e9950754899bef9d3c859224, type: 3}
+  - sceneName: Stage 6
+    bgmClip: {fileID: 8300000, guid: 3e2e1b42e9950754899bef9d3c859224, type: 3}
   _restartEvenIfSameClip: 0
   _doNothingIfNotMapped: 1
 --- !u!114 &163288045
@@ -315,11 +319,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _bgmSource: {fileID: 0}
   _sfxSource: {fileID: 0}
+  _bgmVolume: 1
+  _sfxVolume: 1
   _moveClip: {fileID: 8300000, guid: 29bde6326b4c34ad8a12da475f79b50a, type: 3}
   _deadClip: {fileID: 8300000, guid: 5fdb13d3756c84fecac96f5a2d124370, type: 3}
   _clearClip: {fileID: 8300000, guid: a0ca8964c08d54c5dbebf245bdc474ca, type: 3}
-  _bgmVolume: 0.7
-  _sfxVolume: 0.8
 --- !u!4 &163288046
 Transform:
   m_ObjectHideFlags: 0

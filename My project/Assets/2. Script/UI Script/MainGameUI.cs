@@ -81,7 +81,11 @@ public class MainGameUI : MonoBehaviour
 
     private void OnClickQuit()
     {
-
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 
     private void SafeRemoveAll(Button btn)

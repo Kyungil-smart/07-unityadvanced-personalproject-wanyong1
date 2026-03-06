@@ -6509,7 +6509,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _board: {fileID: 1551251169}
   _stageIndex0Based: 0
-  _totalStages: 4
+  _totalStages: 6
 --- !u!4 &1839899656
 Transform:
   m_ObjectHideFlags: 0

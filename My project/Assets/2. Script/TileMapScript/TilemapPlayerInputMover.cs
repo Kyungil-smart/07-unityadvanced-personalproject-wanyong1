@@ -129,6 +129,7 @@ public class TilemapPlayerInputMover : MonoBehaviour
     }
 
     // 오브젝트 밀기: from 칸에 있는 PUSH 전부를 1칸 밀기(연쇄)
+    // 오브젝트 밀기: from 칸에 있는 PUSH 전부를 1칸 밀기(연쇄)
     private bool TryShiftAllPushObjectsAt(Vector2Int from, Vector2Int dir)
     {
         var here = _board.GetObjects(from.x, from.y);
@@ -136,18 +137,31 @@ public class TilemapPlayerInputMover : MonoBehaviour
         // from 칸의 PUSH들 스냅샷
         var pushList = new List<ObjectType>();
         for (int i = 0; i < here.Count; i++)
+        {
             if (_gm != null && _gm.IsPush(here[i]))
                 pushList.Add(here[i]);
+        }
 
         if (pushList.Count == 0) return true;
 
         Vector2Int to = from + dir;
         if (!_board.InRange(to.x, to.y)) return false;
 
+        // 목적지 텍스트도 PUSH처럼 먼저 밀기
+        var targetText = _board.GetText(to.x, to.y);
+        if (targetText != TextType.None)
+        {
+            if (!TryShiftTextAt(to, dir))
+                return false;
+        }
+
         // 목적지 STOP이면 불가
         var targets = _board.GetObjects(to.x, to.y);
         for (int i = 0; i < targets.Count; i++)
-            if (_gm != null && _gm.IsStop(targets[i])) return false;
+        {
+            if (_gm != null && _gm.IsStop(targets[i]))
+                return false;
+        }
 
         // 목적지에도 PUSH가 있으면 먼저 연쇄 밀기
         if (!TryShiftAllPushObjectsAt(to, dir)) return false;

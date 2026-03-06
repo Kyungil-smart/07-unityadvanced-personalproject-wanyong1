@@ -51,9 +51,9 @@ public class LevelSelectUI : MonoBehaviour
         for (int i = 0; i < stageCount; i++)
         {
             bool isCleared = _progress.cleared[i];
-            bool isUnlocked = (i == 0) || _progress.cleared[i - 1]; 
+            bool isUnlocked = (i == 0) || _progress.cleared[i - 1];
 
-            ApplyAlphaByButtonColors(stageButtons[i], isCleared ? clearedAlpha : unclearedAlpha);
+            ApplyAlphaAll(stageButtons[i], isCleared ? clearedAlpha : unclearedAlpha);
             stageButtons[i].interactable = isUnlocked;
         }
     }
@@ -86,22 +86,15 @@ public class LevelSelectUI : MonoBehaviour
         SceneManager.LoadScene(mainSceneName);
     }
 
-    private void ApplyAlphaByButtonColors(Button btn, float alpha)
+    private void ApplyAlphaAll(Button btn, float alpha)
     {
-        var cb = btn.colors;
+        if (btn == null) return;
 
-        cb.normalColor = WithAlpha(cb.normalColor, alpha);
-        cb.highlightedColor = WithAlpha(cb.highlightedColor, alpha);
-        cb.pressedColor = WithAlpha(cb.pressedColor, alpha);
-        cb.selectedColor = WithAlpha(cb.selectedColor, alpha);
-        cb.disabledColor = WithAlpha(cb.disabledColor, Mathf.Clamp01(alpha * 0.7f));
+        // 1) CanvasGroup으로 전체 알파 (텍스트 포함)
+        var cg = btn.GetComponent<CanvasGroup>();
+        if (cg == null) cg = btn.gameObject.AddComponent<CanvasGroup>();
+        cg.alpha = alpha;
 
-        btn.colors = cb;
     }
 
-    private Color WithAlpha(Color c, float a)
-    {
-        c.a = a;
-        return c;
-    }
 }
