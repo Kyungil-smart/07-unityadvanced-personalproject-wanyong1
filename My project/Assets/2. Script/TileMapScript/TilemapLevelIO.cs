@@ -1,119 +1,118 @@
-using System.IO;
-using UnityEngine;
-using static CellType;
+// 쓸모 없어졌다. Json으로 맵 레벨 저장/불러오기 하는 기능
 
-public class TilemapLevelIO : MonoBehaviour
-{
-    [Header("Refs")]
-    [SerializeField] private TilemapBoardManager _board;
 
-    [Header("File")]
-    [SerializeField] private string _fileName = "level_01.json";
+//using System.IO;
+//using UnityEngine;
+//using static CellType;
 
-    private string FullPath => Path.Combine(Application.persistentDataPath, _fileName);
+//public class TilemapLevelIO : MonoBehaviour
+//{
+//    [Header("Refs")]
+//    [SerializeField] private TilemapBoardManager _board;
 
-    [ContextMenu("Save Level To JSON")]
-    public void Save()
-    {
-        if (_board == null)
-        {
-            Debug.LogError("[TilemapLevelIO] Board ref missing.");
-            return;
-        }
+//    [Header("File")]
+//    [SerializeField] private string _fileName = "level_01.json";
 
-        var data = new LevelData
-        {
-            width = _board.Width,
-            height = _board.Height,
-            origin = Vector2Int.zero // 지금 보드는 내부좌표 기준이라 일단 0,0 저장
-        };
+//    private string FullPath => Path.Combine(Application.persistentDataPath, _fileName);
 
-        // 멀티 오브젝트: 각 칸의 리스트를 전부 저장
-        for (int y = 0; y < _board.Height; y++)
-        {
-            for (int x = 0; x < _board.Width; x++)
-            {
-                var objs = _board.GetObjects(x, y);
-                for (int i = 0; i < objs.Count; i++)
-                {
-                    var obj = objs[i];
-                    if (obj != ObjectType.None)
-                        data.objects.Add(new ObjectEntry { x = x, y = y, type = obj });
-                }
+//    [ContextMenu("Save Level To JSON")]
+//    public void Save()
+//    {
+//        if (_board == null)
+//        {
+//            Debug.LogError("[TilemapLevelIO] Board ref missing.");
+//            return;
+//        }
 
-                var txt = _board.GetText(x, y);
-                if (txt != TextType.None)
-                    data.texts.Add(new TextCell { x = x, y = y, type = txt });
-            }
-        }
+//        var data = new LevelData
+//        {
+//            width = _board.Width,
+//            height = _board.Height,
+//            origin = Vector2Int.zero
+//        };
 
-        var json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(FullPath, json);
+//        멀티 오브젝트: 각 칸의 리스트를 전부 저장
+//        for (int y = 0; y < _board.Height; y++)
+//        {
+//            for (int x = 0; x < _board.Width; x++)
+//            {
+//                var objs = _board.GetObjects(x, y);
+//                for (int i = 0; i < objs.Count; i++)
+//                {
+//                    var obj = objs[i];
+//                    if (obj != ObjectType.None)
+//                        data.objects.Add(new ObjectEntry { x = x, y = y, type = obj });
+//                }
 
-        Debug.Log($"[TilemapLevelIO] Saved: {FullPath}\nObjects={data.objects.Count}, Texts={data.texts.Count}");
-    }
+//                var txt = _board.GetText(x, y);
+//                if (txt != TextType.None)
+//                    data.texts.Add(new TextCell { x = x, y = y, type = txt });
+//            }
+//        }
 
-    [ContextMenu("Load Level From JSON")]
-    public void Load()
-    {
-        if (_board == null)
-        {
-            Debug.LogError("[TilemapLevelIO] Board ref missing.");
-            return;
-        }
+//        var json = JsonUtility.ToJson(data, true);
+//        File.WriteAllText(FullPath, json);
 
-        if (!File.Exists(FullPath))
-        {
-            Debug.LogWarning($"[TilemapLevelIO] File not found: {FullPath}");
-            return;
-        }
+//        Debug.Log($"[TilemapLevelIO] Saved: {FullPath}\nObjects={data.objects.Count}, Texts={data.texts.Count}");
+//    }
 
-        var json = File.ReadAllText(FullPath);
-        var data = JsonUtility.FromJson<LevelData>(json);
+//    [ContextMenu("Load Level From JSON")]
+//    public void Load()
+//    {
+//        if (_board == null)
+//        {
+//            Debug.LogError("[TilemapLevelIO] Board ref missing.");
+//            return;
+//        }
 
-        // 1) 기존 보드 비우기 (멀티 오브젝트는 RemoveObjectOnce로 싹 비워야 함)
-        for (int y = 0; y < _board.Height; y++)
-        {
-            for (int x = 0; x < _board.Width; x++)
-            {
-                // 오브젝트: 리스트가 빌 때까지 제거
-                var objs = _board.GetObjects(x, y);
-                // GetObjects는 IReadOnlyList라서, 안전하게 "현재 리스트 스냅샷"을 돌며 제거
-                for (int i = objs.Count - 1; i >= 0; i--)
-                {
-                    _board.RemoveObjectOnce(x, y, objs[i]);
-                }
+//        if (!File.Exists(FullPath))
+//        {
+//            Debug.LogWarning($"[TilemapLevelIO] File not found: {FullPath}");
+//            return;
+//        }
 
-                // 텍스트: 단일
-                _board.SetText(x, y, TextType.None);
-            }
-        }
+//        var json = File.ReadAllText(FullPath);
+//        var data = JsonUtility.FromJson<LevelData>(json);
 
-        // 2) JSON 복원
-        if (data.objects != null)
-        {
-            foreach (var e in data.objects)
-                _board.AddObject(e.x, e.y, e.type);
-        }
+//        for (int y = 0; y < _board.Height; y++)
+//        {
+//            for (int x = 0; x < _board.Width; x++)
+//            {
+//                var objs = _board.GetObjects(x, y);
+//                for (int i = objs.Count - 1; i >= 0; i--)
+//                {
+//                    _board.RemoveObjectOnce(x, y, objs[i]);
+//                }
 
-        if (data.texts != null)
-        {
-            foreach (var c in data.texts)
-                _board.SetText(c.x, c.y, c.type);
-        }
+//                _board.SetText(x, y, TextType.None);
+//            }
+//        }
 
-        Debug.Log($"[TilemapLevelIO] Loaded: {FullPath}\nObjects={data.objects?.Count ?? 0}, Texts={data.texts?.Count ?? 0}");
-    }
+//        2) JSON 복원
+//        if (data.objects != null)
+//        {
+//            foreach (var e in data.objects)
+//                _board.AddObject(e.x, e.y, e.type);
+//        }
 
-    public void SaveAs(string fileName)
-    {
-        _fileName = fileName;
-        Save();
-    }
+//        if (data.texts != null)
+//        {
+//            foreach (var c in data.texts)
+//                _board.SetText(c.x, c.y, c.type);
+//        }
 
-    public void LoadFrom(string fileName)
-    {
-        _fileName = fileName;
-        Load();
-    }
-}
+//        Debug.Log($"[TilemapLevelIO] Loaded: {FullPath}\nObjects={data.objects?.Count ?? 0}, Texts={data.texts?.Count ?? 0}");
+//    }
+
+//    public void SaveAs(string fileName)
+//    {
+//        _fileName = fileName;
+//        Save();
+//    }
+
+//    public void LoadFrom(string fileName)
+//    {
+//        _fileName = fileName;
+//        Load();
+//    }
+//}

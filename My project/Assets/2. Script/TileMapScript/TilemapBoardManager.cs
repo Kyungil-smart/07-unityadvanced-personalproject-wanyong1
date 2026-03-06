@@ -236,6 +236,6 @@ public class TilemapBoardManager : MonoBehaviour
         _babaTilemap.SetTile(cell, target);
 
         // 이제 TransformMatrix 안 쓰니까 리셋도 필요 없음(있어도 무해)
-        _babaTilemap.SetTransformMatrix(cell, Matrix4x4.identity);
+        //_babaTilemap.SetTransformMatrix(cell, Matrix4x4.identity);
     }
 }

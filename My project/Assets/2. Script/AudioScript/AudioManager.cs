@@ -31,7 +31,6 @@ public sealed class AudioManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton + Persist
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -55,7 +54,6 @@ public sealed class AudioManager : MonoBehaviour
         _bgmSource.playOnAwake = false;
         _bgmSource.loop = true;
 
-        // SFX (child로 분리해도 되고, 그냥 같은 오브젝트여도 됨)
         if (_sfxSource == null)
         {
             var child = new GameObject("SFX_Source");
@@ -65,7 +63,6 @@ public sealed class AudioManager : MonoBehaviour
         _sfxSource.playOnAwake = false;
         _sfxSource.loop = false;
 
-        // 2D로 고정
         _sfxSource.spatialBlend = 0f;
         _bgmSource.spatialBlend = 0f;
     }

@@ -24,7 +24,7 @@ public class TilemapGameManager : MonoBehaviour
     public bool IsDefeat(ObjectType t) => HasRule(t, TextType.Defeat);
 
     [Header("Stage Progress")]
-    [SerializeField] private int _stageIndex0Based = 0; // Stage1=0, Stage2=1
+    [SerializeField] private int _stageIndex0Based = 0;
     [SerializeField] private int _totalStages = 4;
     private bool _savedClearOnce = false;
 
@@ -59,7 +59,6 @@ public class TilemapGameManager : MonoBehaviour
 
         ApplyObjectTransforms();
 
-        // 룰이 바뀌면 승리상태는 다시 false (기존 로직 유지)
         HasWon = false;
     }
 
@@ -111,7 +110,6 @@ public class TilemapGameManager : MonoBehaviour
             {
                 HasWon = true;
 
-                // Clear SFX
                 AudioManager.Instance?.PlayClear();
 
                 if (!_savedClearOnce)
@@ -119,7 +117,7 @@ public class TilemapGameManager : MonoBehaviour
                     StageProgressIO.MarkCleared(_stageIndex0Based, _totalStages);
                     _savedClearOnce = true;
                 }
-                OnWon?.Invoke(); // UI가 뜨게 된다
+                OnWon?.Invoke();
                 Debug.Log("[Tilemap] YOU touched WIN!");
                 return;
             }
@@ -144,7 +142,6 @@ public class TilemapGameManager : MonoBehaviour
 
         if (hasDefeat)
         {
-            // Dead SFX
             AudioManager.Instance?.PlayDead();
 
             _board.RemoveObjectOnce(pos.x, pos.y, mover);
@@ -153,7 +150,6 @@ public class TilemapGameManager : MonoBehaviour
 
         if (hasHot && IsMelt(mover))
         {
-            // Dead SFX
             AudioManager.Instance?.PlayDead();
 
             _board.RemoveObjectOnce(pos.x, pos.y, mover);
