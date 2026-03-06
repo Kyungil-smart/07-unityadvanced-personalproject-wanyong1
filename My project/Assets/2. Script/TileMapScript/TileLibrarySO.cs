@@ -46,20 +46,6 @@ public class TileLibrarySO : ScriptableObject
         return null;
     }
 
-    public bool TryGetObjectType(TileBase tile, out ObjectType type)
-    {
-        for (int i = 0; i < _objectTiles.Length; i++)
-        {
-            if (_objectTiles[i].tile == tile)
-            {
-                type = _objectTiles[i].type;
-                return true;
-            }
-        }
-        type = ObjectType.None;
-        return false;
-    }
-
     public bool TryGetTextType(TileBase tile, out TextType type)
     {
         for (int i = 0; i < _textTiles.Length; i++)

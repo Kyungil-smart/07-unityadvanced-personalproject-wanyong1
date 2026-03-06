@@ -8,7 +8,6 @@ public class TilemapUndoManager : MonoBehaviour
 {
     [Header("Refs")]
     [SerializeField] private TilemapBoardManager _board;
-    [SerializeField] private TilemapGameManager _gm;
 
     [Header("Undo")]
     [SerializeField, Min(1)] private int _maxHistory = 200;
@@ -24,7 +23,6 @@ public class TilemapUndoManager : MonoBehaviour
     private void Awake()
     {
         if (_board == null) _board = FindFirstObjectByType<TilemapBoardManager>();
-        if (_gm == null) _gm = FindFirstObjectByType<TilemapGameManager>();
     }
 
     private void Update()

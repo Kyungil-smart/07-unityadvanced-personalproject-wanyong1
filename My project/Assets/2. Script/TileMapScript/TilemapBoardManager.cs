@@ -63,21 +63,6 @@ public class TilemapBoardManager : MonoBehaviour
     public bool InRange(int x, int y) => 0 <= x && x < _width && 0 <= y && y < _height;
     private Vector3Int ToCell(int x, int y) => new Vector3Int(_origin.x + x, _origin.y + y, 0);
 
-    public Vector3 GridToWorld(int x, int y)
-    {
-        var cell = ToCell(x, y);
-        var baseMap = _babaTilemap != null ? _babaTilemap : _textTilemap;
-        return baseMap.GetCellCenterWorld(cell);
-    }
-
-    public bool WorldToGrid(Vector3 worldPos, out int x, out int y)
-    {
-        var baseMap = _babaTilemap != null ? _babaTilemap : _textTilemap;
-        var cell = baseMap.WorldToCell(worldPos);
-        x = cell.x - _origin.x;
-        y = cell.y - _origin.y;
-        return InRange(x, y);
-    }
 
     // Objects
     public IReadOnlyList<ObjectType> GetObjects(int x, int y)
@@ -234,8 +219,5 @@ public class TilemapBoardManager : MonoBehaviour
         else target = _tiles.babaRight;
 
         _babaTilemap.SetTile(cell, target);
-
-        // 이제 TransformMatrix 안 쓰니까 리셋도 필요 없음(있어도 무해)
-        //_babaTilemap.SetTransformMatrix(cell, Matrix4x4.identity);
     }
 }

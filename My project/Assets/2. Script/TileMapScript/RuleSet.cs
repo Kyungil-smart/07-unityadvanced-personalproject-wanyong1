@@ -31,17 +31,4 @@ public class RuleSet
     public bool TryGetTransform(ObjectType from, out ObjectType to)
         => _transforms.TryGetValue(from, out to);
 
-    public int RuleCount
-    {
-        get
-        {
-            int count = 0;
-            foreach (var kv in _map) count += kv.Value.Count;
-            count += _transforms.Count;
-            return count;
-        }
-    }
-
-    public IEnumerable<KeyValuePair<ObjectType, HashSet<TextType>>> Pairs => _map;
-    public IEnumerable<KeyValuePair<ObjectType, ObjectType>> TransformPairs => _transforms;
 }

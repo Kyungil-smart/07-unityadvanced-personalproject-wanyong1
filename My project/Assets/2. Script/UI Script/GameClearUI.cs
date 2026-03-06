@@ -43,7 +43,7 @@ public class GameClearUI : MonoBehaviour
 
         if (_clearPanel != null) _clearPanel.SetActive(true);
 
-        // 원하면 정지(퍼즐게임 느낌)
+        // 원하면 정지
         Time.timeScale = 0f;
     }
 
@@ -51,12 +51,5 @@ public class GameClearUI : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(_stageSelectSceneName);
-    }
-
-    private void OnClickRetry()
-    {
-        Time.timeScale = 1f;
-        var active = SceneManager.GetActiveScene().name;
-        SceneManager.LoadScene(active);
     }
 }

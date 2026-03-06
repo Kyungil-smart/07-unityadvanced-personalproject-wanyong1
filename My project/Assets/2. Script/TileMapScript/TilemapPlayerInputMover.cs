@@ -128,8 +128,6 @@ public class TilemapPlayerInputMover : MonoBehaviour
         return true;
     }
 
-    // 오브젝트 밀기: from 칸에 있는 PUSH 전부를 1칸 밀기(연쇄)
-    // 오브젝트 밀기: from 칸에 있는 PUSH 전부를 1칸 밀기(연쇄)
     private bool TryShiftAllPushObjectsAt(Vector2Int from, Vector2Int dir)
     {
         var here = _board.GetObjects(from.x, from.y);
